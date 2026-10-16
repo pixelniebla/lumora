@@ -34,6 +34,13 @@ void main() {
     expect(addTile, findsOneWidget);
     expect(find.byIcon(Icons.close), findsNothing, reason: 'con 2 no se puede quitar ninguna');
 
+    // menú de ajuste de imagen: elegir «llenar» se guarda en el estado
+    await tester.tap(find.byKey(const ValueKey('fit-menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Llenar la pantalla'));
+    await tester.pumpAndSettle();
+    expect(s.multiviewFit, 'cover');
+
     // con 2 pantallas, cada una ocupa la mitad de la ventana a todo lo alto (sin hueco para un botÃ³n)
     final body = tester.getRect(find.byType(Scaffold).first);
     final rects = [for (var k = 0; k < find.byIcon(Icons.add_circle_outline).evaluate().length; k++) tester.getRect(find.ancestor(of: find.byIcon(Icons.add_circle_outline).at(k), matching: find.byType(Stack)).first)];

@@ -19,6 +19,12 @@ class MultiviewScreen extends StatefulWidget {
   State<MultiviewScreen> createState() => _MultiviewScreenState();
 }
 
+BoxFit _boxFit(String name) => switch (name) {
+      'cover' => BoxFit.cover,
+      'fill' => BoxFit.fill,
+      _ => BoxFit.contain,
+    };
+
 class _Cell {
   final Player player = Player(configuration: const PlayerConfiguration(bufferSize: 16 * 1024 * 1024));
   late final VideoController video = VideoController(player);
@@ -85,6 +91,18 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
         backgroundColor: Colors.transparent,
         title: Text(context.tr('multiview')),
         actions: [
+          PopupMenuButton<String>(
+            key: const ValueKey('fit-menu'),
+            tooltip: translate(lang, 'fit_mode'),
+            icon: const Icon(Icons.aspect_ratio),
+            color: kSurface2,
+            initialValue: context.watch<AppState>().multiviewFit,
+            onSelected: context.read<AppState>().setMultiviewFit,
+            itemBuilder: (_) => [
+              for (final m in const ['contain', 'cover', 'fill'])
+                PopupMenuItem(value: m, child: Text(translate(lang, 'fit_$m'))),
+            ],
+          ),
           // Not a placeholder tile: the screens always fill the window, and this only appears while
           // there is room for one more.
           if (_cells.length < _maxCells)
@@ -160,7 +178,9 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
               Positioned(top: 0, right: 0, child: _removeButton(c)),
             ])
           : Stack(children: [
-              Positioned.fill(child: Video(controller: c.video, controls: NoVideoControls)),
+              Positioned.fill(
+                child: Video(controller: c.video, controls: NoVideoControls, fit: _boxFit(context.watch<AppState>().multiviewFit)),
+              ),
               Positioned.fill(
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,

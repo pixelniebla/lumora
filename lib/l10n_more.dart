@@ -33,6 +33,10 @@ const moreStrings = <String, Map<String, String>>{
     'try_lower': 'Probar calidad menor',
     'add_screen': 'Añadir pantalla',
     'remove_screen': 'Quitar pantalla',
+    'fit_mode': 'Ajuste de la imagen',
+    'fit_contain': 'Mantener proporción (con barras negras)',
+    'fit_cover': 'Llenar la pantalla (recorta los bordes)',
+    'fit_fill': 'Estirar (deforma la imagen)',
   },
   'en': {
     'backup': 'Backup',
@@ -67,6 +71,10 @@ const moreStrings = <String, Map<String, String>>{
     'try_lower': 'Try lower quality',
     'add_screen': 'Add screen',
     'remove_screen': 'Remove screen',
+    'fit_mode': 'Picture fit',
+    'fit_contain': 'Keep aspect ratio (black bars)',
+    'fit_cover': 'Fill the screen (crops the edges)',
+    'fit_fill': 'Stretch (distorts the picture)',
   },
   'pt': {
     'backup': 'Cópia de segurança',
@@ -101,6 +109,10 @@ const moreStrings = <String, Map<String, String>>{
     'try_lower': 'Tentar qualidade inferior',
     'add_screen': 'Adicionar ecrã',
     'remove_screen': 'Remover ecrã',
+    'fit_mode': 'Ajuste da imagem',
+    'fit_contain': 'Manter proporção (com barras pretas)',
+    'fit_cover': 'Preencher o ecrã (corta as margens)',
+    'fit_fill': 'Esticar (deforma a imagem)',
   },
   'fr': {
     'backup': 'Sauvegarde',
@@ -135,5 +147,9 @@ const moreStrings = <String, Map<String, String>>{
     'try_lower': 'Essayer une qualité inférieure',
     'add_screen': 'Ajouter un écran',
     'remove_screen': 'Retirer l\'écran',
+    'fit_mode': 'Ajustement de l\'image',
+    'fit_contain': 'Garder les proportions (bandes noires)',
+    'fit_cover': 'Remplir l\'écran (rogne les bords)',
+    'fit_fill': 'Étirer (déforme l\'image)',
   },
 };
