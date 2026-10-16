@@ -26,7 +26,11 @@ class _Cell {
 }
 
 class _MultiviewScreenState extends State<MultiviewScreen> {
-  final _cells = List.generate(4, (_) => _Cell());
+  /// Starts with two screens; the user can add up to [_maxCells]. Players are only created for screens
+  /// that exist, so the default view costs half the memory and CPU of the old fixed four.
+  static const _minCells = 2;
+  static const _maxCells = 4;
+  final _cells = List.generate(_minCells, (_) => _Cell());
   int _focus = 0;
 
   @override
@@ -37,15 +41,33 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
     super.dispose();
   }
 
-  Future<void> _pick(int i) async {
+  Future<void> _pick(_Cell cell) async {
     final app = context.read<AppState>();
     final ch = await pickChannel(context);
-    if (ch == null) return;
-    final cell = _cells[i];
+    if (ch == null || !mounted || !_cells.contains(cell)) return; // cancelled, or the screen was removed meanwhile
     cell.channel = ch;
     await configurePlayer(cell.player, app, lowQuality: true, light: true);
     await cell.player.open(Media(ch.url));
-    setState(() => _focus = i);
+    if (!mounted || !_cells.contains(cell)) return;
+    setState(() => _focus = _cells.indexOf(cell));
+    _applyAudio();
+  }
+
+  Future<void> _addScreen() async {
+    if (_cells.length >= _maxCells) return;
+    final cell = _Cell();
+    setState(() => _cells.add(cell));
+    await _pick(cell);
+  }
+
+  void _removeScreen(_Cell cell) {
+    final i = _cells.indexOf(cell);
+    if (i < 0 || _cells.length <= _minCells) return;
+    setState(() {
+      _cells.removeAt(i);
+      if (_focus >= _cells.length || i < _focus) _focus = (_focus - 1).clamp(0, _cells.length - 1);
+    });
+    cell.player.dispose();
     _applyAudio();
   }
 
@@ -67,11 +89,45 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           childAspectRatio: 16 / 9,
-          children: [for (var i = 0; i < 4; i++) _cell(i)],
+          children: [
+            for (var i = 0; i < _cells.length; i++) _cell(i),
+            if (_cells.length < _maxCells) _addTile(),
+          ],
         ),
       ),
     );
   }
+
+  Widget _addTile() => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const ValueKey('add-screen'),
+          borderRadius: BorderRadius.circular(12),
+          onTap: _addScreen,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: kMuted.withValues(alpha: 0.5)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.add, size: 36, color: kMuted),
+                const SizedBox(height: 6),
+                Text(translate(context.read<AppState>().lang, 'add_screen'), style: const TextStyle(color: kMuted)),
+              ]),
+            ),
+          ),
+        ),
+      );
+
+  Widget _removeButton(_Cell cell) => _cells.length > _minCells
+      ? IconButton(
+          iconSize: 18,
+          tooltip: translate(context.read<AppState>().lang, 'remove_screen'),
+          icon: const Icon(Icons.close),
+          onPressed: () => _removeScreen(cell),
+        )
+      : const SizedBox.shrink();
 
   Widget _cell(int i) {
     final c = _cells[i];
@@ -84,16 +140,21 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
       ),
       clipBehavior: Clip.antiAlias,
       child: c.channel == null
-          ? InkWell(
-              onTap: () => _pick(i),
-              child: Center(
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.add_circle_outline, size: 40, color: kMuted),
-                  const SizedBox(height: 8),
-                  Text(context.tr('tap_to_pick'), style: const TextStyle(color: kMuted)),
-                ]),
+          ? Stack(children: [
+              Positioned.fill(
+                child: InkWell(
+                  onTap: () => _pick(c),
+                  child: Center(
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.add_circle_outline, size: 40, color: kMuted),
+                      const SizedBox(height: 8),
+                      Text(context.tr('tap_to_pick'), style: const TextStyle(color: kMuted)),
+                    ]),
+                  ),
+                ),
               ),
-            )
+              Positioned(top: 0, right: 0, child: _removeButton(c)),
+            ])
           : Stack(children: [
               Positioned.fill(child: Video(controller: c.video, controls: NoVideoControls)),
               Positioned.fill(
@@ -120,8 +181,9 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
                       iconSize: 18,
                       tooltip: context.tr('pick_channel'),
                       icon: const Icon(Icons.swap_horiz),
-                      onPressed: () => _pick(i),
+                      onPressed: () => _pick(c),
                     ),
+                    _removeButton(c),
                   ]),
                 ),
               ),

@@ -1,6 +1,6 @@
 ﻿; Lumora installer script (Inno Setup 6)
 #define AppName "Lumora"
-#define AppVersion "1.3.4"
+#define AppVersion "1.3.5"
 #define AppExe "Lumora.exe"
 #define BuildDir "..\build\windows\x64\runner\Release"
 
