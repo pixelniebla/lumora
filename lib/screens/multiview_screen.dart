@@ -79,47 +79,51 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.read<AppState>().lang;
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent, title: Text(context.tr('multiview'))),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: Text(context.tr('multiview')),
+        actions: [
+          // Not a placeholder tile: the screens always fill the window, and this only appears while
+          // there is room for one more.
+          if (_cells.length < _maxCells)
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: TextButton.icon(
+                key: const ValueKey('add-screen'),
+                onPressed: _addScreen,
+                icon: const Icon(Icons.add),
+                label: Text(translate(lang, 'add_screen')),
+              ),
+            ),
+        ],
+      ),
       body: Container(
         decoration: const BoxDecoration(gradient: kBackdrop),
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: GridView.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 16 / 9,
-          children: [
-            for (var i = 0; i < _cells.length; i++) _cell(i),
-            if (_cells.length < _maxCells) _addTile(),
-          ],
-        ),
+        child: _layout(),
       ),
     );
   }
 
-  Widget _addTile() => Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: const ValueKey('add-screen'),
-          borderRadius: BorderRadius.circular(12),
-          onTap: _addScreen,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: kMuted.withValues(alpha: 0.5)),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.add, size: 36, color: kMuted),
-                const SizedBox(height: 6),
-                Text(translate(context.read<AppState>().lang, 'add_screen'), style: const TextStyle(color: kMuted)),
-              ]),
-            ),
-          ),
-        ),
-      );
-
+  /// 2 screens: each takes half of the window (side by side, full height).
+  /// 3: two on top, the third spans the whole bottom. 4: a 2x2 grid. Nothing is left empty.
+  Widget _layout() {
+    Widget row(List<int> idx) => Row(children: [
+          for (var k = 0; k < idx.length; k++) ...[
+            if (k > 0) const SizedBox(width: 8),
+            Expanded(child: _cell(idx[k])),
+          ],
+        ]);
+    final n = _cells.length;
+    if (n <= 2) return row([for (var i = 0; i < n; i++) i]);
+    return Column(children: [
+      Expanded(child: row([0, 1])),
+      const SizedBox(height: 8),
+      Expanded(child: row([for (var i = 2; i < n; i++) i])),
+    ]);
+  }
   Widget _removeButton(_Cell cell) => _cells.length > _minCells
       ? IconButton(
           iconSize: 18,

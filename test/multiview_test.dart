@@ -15,7 +15,7 @@ const _mpv = r'build\windows\x64\runner\Release\libmpv-2.dll';
 void main() {
   final haveMpv = Platform.isWindows && File(_mpv).existsSync();
 
-  testWidgets('Multivista: empieza con 2 pantallas, se pueden añadir hasta 4 y quitar hasta 2', (tester) async {
+  testWidgets('Multivista: empieza con 2 pantallas, se pueden aÃ±adir hasta 4 y quitar hasta 2', (tester) async {
     MediaKit.ensureInitialized(libmpv: File(_mpv).absolute.path);
     tester.view.physicalSize = const Size(1600, 1000);
     tester.view.devicePixelRatio = 1;
@@ -34,6 +34,14 @@ void main() {
     expect(addTile, findsOneWidget);
     expect(find.byIcon(Icons.close), findsNothing, reason: 'con 2 no se puede quitar ninguna');
 
+    // con 2 pantallas, cada una ocupa la mitad de la ventana a todo lo alto (sin hueco para un botÃ³n)
+    final body = tester.getRect(find.byType(Scaffold).first);
+    final rects = [for (var k = 0; k < find.byIcon(Icons.add_circle_outline).evaluate().length; k++) tester.getRect(find.ancestor(of: find.byIcon(Icons.add_circle_outline).at(k), matching: find.byType(Stack)).first)];
+    expect(rects.length, 2);
+    expect(rects[0].width, closeTo(rects[1].width, 1));
+    expect(rects[0].width, greaterThan(body.width * 0.45));
+    expect(rects[0].height, greaterThan(body.height * 0.8), reason: 'a todo lo alto, no solo la fila superior');
+
     Future<void> add() async {
       await tester.tap(addTile);
       await tester.pump();
@@ -45,9 +53,12 @@ void main() {
     await add();
     expect(emptyCells, findsNWidgets(3));
     expect(addTile, findsOneWidget);
+    final r3 = [for (var k = 0; k < find.byIcon(Icons.add_circle_outline).evaluate().length; k++) tester.getRect(find.ancestor(of: find.byIcon(Icons.add_circle_outline).at(k), matching: find.byType(Stack)).first)];
+    expect(r3[2].width, greaterThan(r3[0].width * 1.8), reason: 'con 3, la tercera ocupa todo el ancho de abajo');
+    expect(r3[2].top, greaterThan(r3[0].bottom - 1));
     await add();
     expect(emptyCells, findsNWidgets(4));
-    expect(addTile, findsNothing, reason: 'máximo 4');
+    expect(addTile, findsNothing, reason: 'mÃ¡ximo 4');
     expect(find.byIcon(Icons.close), findsNWidgets(4));
 
     await tester.tap(find.byIcon(Icons.close).first);
@@ -56,7 +67,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.close).first);
     await tester.pump();
     expect(emptyCells, findsNWidgets(2));
-    expect(find.byIcon(Icons.close), findsNothing, reason: 'vuelve al mínimo de 2');
+    expect(find.byIcon(Icons.close), findsNothing, reason: 'vuelve al mÃ­nimo de 2');
     expect(addTile, findsOneWidget);
   }, skip: !haveMpv, timeout: const Timeout(Duration(minutes: 2)));
 }
