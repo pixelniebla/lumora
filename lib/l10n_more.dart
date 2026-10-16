@@ -29,6 +29,8 @@ const moreStrings = <String, Map<String, String>>{
     'sched_done': 'Grabación guardada: {path}',
     'sched_kind_record': 'Grabación',
     'sched_kind_remind': 'Recordatorio',
+    'slow_connection': 'El canal se corta: tu conexión o el proveedor no mantienen esta calidad',
+    'try_lower': 'Probar calidad menor',
   },
   'en': {
     'backup': 'Backup',
@@ -59,6 +61,8 @@ const moreStrings = <String, Map<String, String>>{
     'sched_done': 'Recording saved: {path}',
     'sched_kind_record': 'Recording',
     'sched_kind_remind': 'Reminder',
+    'slow_connection': 'The channel keeps freezing: your connection or the provider cannot sustain this quality',
+    'try_lower': 'Try lower quality',
   },
   'pt': {
     'backup': 'Cópia de segurança',
@@ -89,6 +93,8 @@ const moreStrings = <String, Map<String, String>>{
     'sched_done': 'Gravação guardada: {path}',
     'sched_kind_record': 'Gravação',
     'sched_kind_remind': 'Lembrete',
+    'slow_connection': 'O canal bloqueia: a sua ligação ou o fornecedor não aguentam esta qualidade',
+    'try_lower': 'Tentar qualidade inferior',
   },
   'fr': {
     'backup': 'Sauvegarde',
@@ -119,5 +125,7 @@ const moreStrings = <String, Map<String, String>>{
     'sched_done': 'Enregistrement sauvegardé : {path}',
     'sched_kind_record': 'Enregistrement',
     'sched_kind_remind': 'Rappel',
+    'slow_connection': 'La chaîne se fige : votre connexion ou le fournisseur ne tient pas cette qualité',
+    'try_lower': 'Essayer une qualité inférieure',
   },
 };

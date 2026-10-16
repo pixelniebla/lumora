@@ -6,6 +6,7 @@ import '../models.dart';
 import 'channel_checker.dart' show kUserAgent;
 import 'log.dart';
 import 'scheduler.dart' show recordingFileFor;
+import 'stall_monitor.dart';
 import 'stream_recorder.dart';
 
 /// Last settings pushed to each player, so zapping does not re-send a dozen mpv properties.
@@ -72,6 +73,43 @@ class PlayerService {
   String? _currentUrl;
   DateTime? _recordingStart;
 
+  /// Freeze detector for the channel being played (see [StallMonitor]).
+  final StallMonitor stall = StallMonitor();
+
+  /// Called when the channel freezes repeatedly even with the bigger buffer: the UI may offer a lower quality.
+  void Function()? onSlowConnection;
+  static const _rebufferSecs = 12;
+  bool _watching = false;
+
+  Future<void> _setProp(String k, String v) async {
+    final p = player.platform;
+    if (p is! NativePlayer) return;
+    try {
+      await p.setProperty(k, v);
+    } catch (_) {}
+  }
+
+  void _watchStalls() {
+    if (_watching) return;
+    _watching = true;
+    player.stream.playing.listen((p) {
+      if (p) stall.onPlaying(DateTime.now());
+    });
+    player.stream.buffering.listen((b) {
+      switch (stall.onBuffering(b, DateTime.now())) {
+        case StallAction.raiseBuffer:
+          // After a freeze, resume only once N seconds are buffered, so a slow provider stops
+          // turning every small gap into a visible stop.
+          Log.i('playback froze: waiting for $_rebufferSecs s of buffer from now on');
+          _setProp('cache-pause-wait', '$_rebufferSecs');
+        case StallAction.suggestLower:
+          onSlowConnection?.call();
+        case StallAction.none:
+          break;
+      }
+    });
+  }
+
   bool get isRecording => _recorder != null;
   String? get recordingPath => _recorder?.path;
   Duration get recordingElapsed => _recordingStart == null ? Duration.zero : DateTime.now().difference(_recordingStart!);
@@ -79,6 +117,9 @@ class PlayerService {
   Future<void> open(Channel c, AppState s, {Duration? start, String? urlOverride}) async {
     await stopRecording();
     current = c;
+    _watchStalls();
+    stall.reset();
+    await _setProp('cache-pause-wait', '1'); // back to fast start (the freeze handler may have raised it)
     await configurePlayer(player, s, live: c.type == ContentType.live);
     _currentUrl = urlOverride ?? c.url;
     Log.i('open ${c.name} ${Log.redact(urlOverride ?? c.url)}');

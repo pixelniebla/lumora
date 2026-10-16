@@ -76,8 +76,24 @@ class _PlayerScreenState extends State<PlayerScreen> {
       if (_ps.isRecording && mounted) setState(() {});
     });
     _bar.poke();
+    _ps.onSlowConnection = _offerLowerQuality;
   }
 
+  /// The channel froze repeatedly: offer the next lower-quality version of it, if the list has one.
+  void _offerLowerQuality() {
+    if (!mounted || !_isLive) return;
+    final versions = _app.variantsOf(_current); // best first
+    final i = versions.indexWhere((v) => v.id == _current.id);
+    final lower = (i >= 0 && i + 1 < versions.length) ? versions[i + 1] : null;
+    final m = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
+    m.showSnackBar(SnackBar(
+      duration: const Duration(seconds: 12),
+      content: Text(translate(_app.lang, 'slow_connection')),
+      action: lower == null
+          ? null
+          : SnackBarAction(label: translate(_app.lang, 'try_lower'), onPressed: () => _zapTo(lower)),
+    ));
+  }
 
   Future<void> _open() async {
     _stallTimer?.cancel();
@@ -251,6 +267,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
       t?.cancel();
     }
     _bar.dispose();
+    if (_ps.onSlowConnection == _offerLowerQuality) _ps.onSlowConnection = null;
     for (final s in _subs) {
       s.cancel();
     }
