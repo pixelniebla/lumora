@@ -1,0 +1,27 @@
+﻿name: build
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.7
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build windows --release --dart-define=LUMORA_UPDATE_URL=https://github.com/pixelniebla/lumora/releases/latest/download
+      - run: choco install innosetup --no-progress -y
+      - run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\lumora.iss'
+      # Unsigned installer. Code signing is done by SignPath (see README) once the project is approved:
+      # add the SignPath submit step here and sign Lumora-Setup-*.exe before publishing the release.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Lumora-Setup
+          path: installer/output/Lumora-Setup-*.exe
