@@ -91,6 +91,15 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
         backgroundColor: Colors.transparent,
         title: Text(context.tr('multiview')),
         actions: [
+          IconButton(
+            key: const ValueKey('layout-toggle'),
+            tooltip: translate(lang, context.watch<AppState>().multiviewLayout == 'stack' ? 'layout_side' : 'layout_stack'),
+            icon: Icon(context.watch<AppState>().multiviewLayout == 'stack' ? Icons.view_column : Icons.view_agenda),
+            onPressed: () {
+              final a = context.read<AppState>();
+              a.setMultiviewLayout(a.multiviewLayout == 'stack' ? 'side' : 'stack');
+            },
+          ),
           PopupMenuButton<String>(
             key: const ValueKey('fit-menu'),
             tooltip: translate(lang, 'fit_mode'),
@@ -125,7 +134,7 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
     );
   }
 
-  /// 2 screens: each takes half of the window (side by side, full height).
+  /// 2 screens: each takes half of the window (side by side, or stacked if chosen).
   /// 3: two on top, the third spans the whole bottom. 4: a 2x2 grid. Nothing is left empty.
   Widget _layout() {
     Widget row(List<int> idx) => Row(children: [
@@ -135,6 +144,15 @@ class _MultiviewScreenState extends State<MultiviewScreen> {
           ],
         ]);
     final n = _cells.length;
+    if (context.watch<AppState>().multiviewLayout == 'stack' && n <= 3) {
+      // one above the other, each as wide as the window
+      return Column(children: [
+        for (var i = 0; i < n; i++) ...[
+          if (i > 0) const SizedBox(height: 8),
+          Expanded(child: _cell(i)),
+        ],
+      ]);
+    }
     if (n <= 2) return row([for (var i = 0; i < n; i++) i]);
     return Column(children: [
       Expanded(child: row([0, 1])),

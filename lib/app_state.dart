@@ -57,6 +57,8 @@ class AppState extends ChangeNotifier {
   bool hideBroken = false;
   /// How multiview fits each video into its screen: contain (black bars), cover (fills, crops) or fill (stretches).
   String multiviewFit = 'contain';
+  /// 'side' (side by side) or 'stack' (one above the other) for 2-3 screens.
+  String multiviewLayout = 'side';
   final Set<String> broken = {};
 
   // Updates
@@ -133,6 +135,7 @@ class AppState extends ChangeNotifier {
     hideBroken = _prefs.getBool('hideBroken') ?? false;
     final fit = _prefs.getString('multiviewFit');
     if (fit == 'cover' || fit == 'fill') multiviewFit = fit!;
+    if (_prefs.getString('multiviewLayout') == 'stack') multiviewLayout = 'stack';
     broken.addAll(_prefs.getStringList('broken') ?? const []);
 
     sources = _decodeList('sources', Source.fromJson);
@@ -492,6 +495,12 @@ class AppState extends ChangeNotifier {
   Future<void> setHwdec(bool v) async {
     hwdec = v;
     await _prefs.setBool('hwdec', v);
+    notifyListeners();
+  }
+
+  Future<void> setMultiviewLayout(String v) async {
+    multiviewLayout = v;
+    await _prefs.setString('multiviewLayout', v);
     notifyListeners();
   }
 

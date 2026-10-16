@@ -34,6 +34,18 @@ void main() {
     expect(addTile, findsOneWidget);
     expect(find.byIcon(Icons.close), findsNothing, reason: 'con 2 no se puede quitar ninguna');
 
+    // disposición apilada: cada pantalla ocupa todo el ancho y la mitad del alto
+    await tester.tap(find.byKey(const ValueKey('layout-toggle')));
+    await tester.pumpAndSettle();
+    final stacked = [for (var k = 0; k < 2; k++) tester.getRect(find.ancestor(of: find.byIcon(Icons.add_circle_outline).at(k), matching: find.byType(Stack)).first)];
+    expect(stacked[0].width, closeTo(stacked[1].width, 1));
+    expect(stacked[0].width, greaterThan(tester.getRect(find.byType(Scaffold).first).width * 0.9), reason: 'apiladas: ancho completo');
+    expect(stacked[1].top, greaterThan(stacked[0].bottom - 1));
+    expect(s.multiviewLayout, 'stack');
+    await tester.tap(find.byKey(const ValueKey('layout-toggle'))); // vuelve a lado a lado
+    await tester.pumpAndSettle();
+    expect(s.multiviewLayout, 'side');
+
     // menú de ajuste de imagen: elegir «llenar» se guarda en el estado
     await tester.tap(find.byKey(const ValueKey('fit-menu')));
     await tester.pumpAndSettle();

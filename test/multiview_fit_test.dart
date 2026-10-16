@@ -21,9 +21,20 @@ void main() {
     expect(s3.multiviewFit, 'contain');
   });
 
+  test('multiviewLayout: por defecto lado a lado; apilada se guarda', () async {
+    SharedPreferences.setMockInitialValues({});
+    final s = AppState();
+    await s.initPrefs();
+    expect(s.multiviewLayout, 'side');
+    await s.setMultiviewLayout('stack');
+    final s2 = AppState();
+    await s2.initPrefs();
+    expect(s2.multiviewLayout, 'stack');
+  });
+
   test('textos del ajuste de imagen en los 4 idiomas', () {
     for (final lang in supportedLanguages.keys) {
-      for (final k in ['fit_mode', 'fit_contain', 'fit_cover', 'fit_fill']) {
+      for (final k in ['fit_mode', 'fit_contain', 'fit_cover', 'fit_fill', 'layout_side', 'layout_stack']) {
         expect(translate(lang, k), isNot(k), reason: '$lang/$k');
       }
     }
