@@ -10,6 +10,7 @@ import 'l10n.dart' show translate;
 import 'screens/dashboard_screen.dart';
 import 'screens/sources_screen.dart';
 import 'services/log.dart';
+import 'services/perf.dart';
 import 'services/player_service.dart';
 import 'theme.dart';
 
@@ -21,6 +22,7 @@ Future<void> main() async {
       Log.e('Flutter error', d.exception, d.stack);
       FlutterError.presentError(d);
     };
+    Perf.instance.start();
     MediaKit.ensureInitialized();
     await windowManager.ensureInitialized();
 

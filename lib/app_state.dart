@@ -16,6 +16,7 @@ import 'services/epg_service.dart';
 import 'services/http_client.dart';
 import 'services/library_cache.dart';
 import 'services/log.dart';
+import 'services/perf.dart';
 import 'services/secrets.dart';
 import 'services/m3u_parser.dart';
 import 'services/scheduler.dart';
@@ -689,6 +690,9 @@ class AppState extends ChangeNotifier {
       ..writeln('EPG loaded: ${!epg.isEmpty}')
       ..writeln('Favorites: ${favorites.length}  history: ${history.length}  scheduled: ${scheduled.length}')
       ..writeln('Update source: $updateSource  auto: $autoUpdate  parental PIN: $pinEnabled')
+      ..writeln()
+      ..writeln('--- performance ---')
+      ..writeln(Perf.instance.report())
       ..writeln()
       ..writeln('--- log (tail) ---')
       ..write(await Log.read(maxChars: 20000));

@@ -6,6 +6,7 @@ import '../models.dart';
 import 'channel_checker.dart' show kUserAgent;
 import 'log.dart';
 import 'scheduler.dart' show recordingFileFor;
+import 'perf.dart';
 import 'stall_monitor.dart';
 import 'stream_recorder.dart';
 
@@ -80,6 +81,8 @@ class PlayerService {
   void Function()? onSlowConnection;
   static const _rebufferSecs = 12;
   bool _watching = false;
+  final Stopwatch _zap = Stopwatch();
+  bool _zapPending = false;
 
   Future<void> _setProp(String k, String v) async {
     final p = player.platform;
@@ -92,6 +95,12 @@ class PlayerService {
   void _watchStalls() {
     if (_watching) return;
     _watching = true;
+    player.stream.width.listen((w) {
+      if (_zapPending && (w ?? 0) > 0) {
+        _zapPending = false;
+        Perf.instance.recordZap(_zap.elapsedMilliseconds);
+      }
+    });
     player.stream.playing.listen((p) {
       if (p) stall.onPlaying(DateTime.now());
     });
@@ -119,6 +128,10 @@ class PlayerService {
     current = c;
     _watchStalls();
     stall.reset();
+    _zap
+      ..reset()
+      ..start();
+    _zapPending = c.type == ContentType.live;
     await _setProp('cache-pause-wait', '1'); // back to fast start (the freeze handler may have raised it)
     await configurePlayer(player, s, live: c.type == ContentType.live);
     _currentUrl = urlOverride ?? c.url;

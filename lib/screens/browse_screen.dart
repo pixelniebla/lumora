@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../app_state.dart';
 import '../l10n.dart';
 import '../models.dart';
+import '../services/logo_cache.dart';
 import '../services/player_service.dart';
 import '../theme.dart';
 import '../widgets/pin_dialog.dart';
@@ -36,7 +37,7 @@ class BrowseScreen extends StatefulWidget {
 }
 
 class _BrowseScreenState extends State<BrowseScreen> {
-  late final PlayerService _ps = context.read<PlayerService>();
+  late final PlayerService _ps;
   String? _categoryId;
   String _query = '';
   _Sort _sort = _Sort.original;
@@ -53,6 +54,12 @@ class _BrowseScreenState extends State<BrowseScreen> {
         BrowseMode.series => ContentType.series,
         _ => null,
       };
+
+  @override
+  void initState() {
+    super.initState();
+    _ps = context.read<PlayerService>(); // not lazily in dispose(): the element is deactivated by then
+  }
 
   @override
   void dispose() {
@@ -243,12 +250,18 @@ class _BrowseScreenState extends State<BrowseScreen> {
   Widget _categoryList(AppState s, List<Category> cats) => Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 8, 16),
         decoration: BoxDecoration(color: kSurface.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(18)),
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: cats.length + 1,
-          itemBuilder: (_, i) => i == 0
-              ? _catTile(s, context.tr('all'), null)
-              : _catTile(s, cats[i - 1].name, cats[i - 1].id),
+        clipBehavior: Clip.antiAlias,
+        // Material above the decoration: ListTile paints its selection colour and ink on the nearest
+        // Material, which would otherwise be hidden behind this container's background.
+        child: Material(
+          type: MaterialType.transparency,
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: cats.length + 1,
+            itemBuilder: (_, i) => i == 0
+                ? _catTile(s, translate(s.lang, 'all'), null)
+                : _catTile(s, cats[i - 1].name, cats[i - 1].id),
+          ),
         ),
       );
 
@@ -272,7 +285,9 @@ class _BrowseScreenState extends State<BrowseScreen> {
       margin: const EdgeInsets.fromLTRB(8, 0, 8, 16),
       decoration: BoxDecoration(color: kSurface.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(18)),
       clipBehavior: Clip.antiAlias,
-      child: items.isEmpty
+      child: Material(
+        type: MaterialType.transparency,
+        child: items.isEmpty
           ? Center(child: Text(context.tr('nothing'), style: const TextStyle(color: kMuted)))
           : Column(children: [
               if (reorderable)
@@ -298,6 +313,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                       ),
               ),
             ]),
+      ),
     );
   }
 
@@ -324,7 +340,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 : null),
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
           IconButton(
-            tooltip: context.tr('favorite'),
+            tooltip: translate(s.lang, 'favorite'),
             icon: Icon(fav ? Icons.star_rounded : Icons.star_border_rounded, color: fav ? kGold : kMuted),
             onPressed: () => s.toggleFavorite(c),
           ),
@@ -400,6 +416,7 @@ class _Logo extends StatelessWidget {
       height: 48,
       child: CachedNetworkImage(
         imageUrl: url!,
+        cacheManager: logoCacheManager,
         fit: BoxFit.contain,
         memCacheWidth: 96,
         memCacheHeight: 96,
