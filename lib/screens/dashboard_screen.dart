@@ -57,14 +57,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: kBackdrop),
+        clipBehavior: Clip.hardEdge,
+        child: Stack(children: [
+          const Positioned(top: -180, right: -120, child: GlowBlob(size: 620)),
+          const Positioned(bottom: -260, left: -160, child: GlowBlob(size: 640, color: kGold)),
+          Padding(
         padding: const EdgeInsets.fromLTRB(40, 28, 40, 28),
         child: Column(
           children: [
             Row(children: [
               const LumoraLogo(size: 52),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Lumora', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                const Text('Lumora',
+                    style: TextStyle(fontFamily: kDisplayFont, fontFamilyFallback: kFontFallback, fontSize: 30, fontWeight: FontWeight.w600, height: 1.1)),
                 Row(children: [
                   Text(
                     '${context.tr('list')}: ${s.merged ? context.tr('all_lists') : s.activeName}',
@@ -113,6 +119,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ]),
           ],
         ),
+          ),
+        ]),
       ),
     );
   }
@@ -170,44 +178,66 @@ class _BigTileState extends State<_BigTile> {
 
   @override
   Widget build(BuildContext context) {
+    final c0 = widget.colors.first, c1 = widget.colors.last;
     return Expanded(
       child: MouseRegion(
+        cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hover = true),
         onExit: (_) => setState(() => _hover = false),
         child: GestureDetector(
           onTap: widget.onTap,
           child: AnimatedScale(
-            scale: _hover ? 1.04 : 1,
-            duration: const Duration(milliseconds: 150),
+            scale: _hover ? 1.035 : 1,
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOut,
             child: AspectRatio(
               aspectRatio: 0.95,
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: widget.colors,
+                    colors: [Color.alphaBlend(c0.withValues(alpha: 0.22), kSurface), Color.alphaBlend(c1.withValues(alpha: 0.08), kSurface)],
                   ),
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: widget.colors.first.withValues(alpha: _hover ? 0.45 : 0.2),
-                      blurRadius: 30,
-                      offset: const Offset(0, 12),
+                  border: Border.all(color: c0.withValues(alpha: _hover ? 0.75 : 0.28), width: 1.4),
+                  boxShadow: [BoxShadow(color: c0.withValues(alpha: _hover ? 0.32 : 0.12), blurRadius: _hover ? 36 : 24, offset: const Offset(0, 14))],
+                ),
+                child: Stack(children: [
+                  Positioned(
+                    right: -26,
+                    bottom: -30,
+                    child: Transform.rotate(angle: tileTilt(), child: Icon(widget.icon, size: 200, color: c0.withValues(alpha: 0.08))),
+                  ),
+                  Positioned.fill(
+                    child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 92,
+                          height: 92,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [c0, c1]),
+                            boxShadow: [BoxShadow(color: c0.withValues(alpha: 0.45), blurRadius: 26)],
+                          ),
+                          child: Icon(widget.icon, size: 46, color: kBg),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(widget.title,
+                            style: const TextStyle(fontFamily: kDisplayFont, fontFamilyFallback: kFontFallback, fontSize: 25, fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 4),
+                        Text(widget.subtitle, style: const TextStyle(color: kMuted, fontSize: 14)),
+                      ],
                     ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(widget.icon, size: 84, color: kBg),
-                    const SizedBox(height: 16),
-                    Text(widget.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: kBg)),
-                    const SizedBox(height: 4),
-                    Text(widget.subtitle, style: TextStyle(color: kBg.withValues(alpha: 0.75))),
-                  ],
-                ),
+                  ),
+                  ),
+                ]),
               ),
             ),
           ),
@@ -216,7 +246,6 @@ class _BigTileState extends State<_BigTile> {
     );
   }
 }
-
 class _SmallButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -226,10 +255,11 @@ class _SmallButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: kSurface2,
-      borderRadius: BorderRadius.circular(16),
+      color: kSurface2.withValues(alpha: 0.7),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        hoverColor: kEmerald.withValues(alpha: 0.10),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),

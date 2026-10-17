@@ -1,6 +1,6 @@
-; Lumora installer script (Inno Setup 6)
+﻿; Lumora installer script (Inno Setup 6)
 #define AppName "Lumora"
-#define AppVersion "1.3.8"
+#define AppVersion "1.4.0"
 #define AppExe "Lumora.exe"
 #define BuildDir "..\build\windows\x64\runner\Release"
 
@@ -15,6 +15,8 @@ DisableProgramGroupPage=yes
 OutputDir=output
 OutputBaseFilename=Lumora-Setup-{#AppVersion}
 SetupIconFile=..\windows\runner\resources\app_icon.ico
+WizardImageFile=assets\wizard.bmp
+WizardSmallImageFile=assets\wizard_small.bmp
 UninstallDisplayIcon={app}\{#AppExe}
 Compression=lzma2/max
 SolidCompression=yes

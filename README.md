@@ -1,3 +1,5 @@
+<p align="center"><img src="brand/lumora_lockup.png" alt="Lumora" width="560"></p>
+
 # Lumora
 
 Reproductor IPTV para Windows (Flutter + mpv). / IPTV player for Windows.

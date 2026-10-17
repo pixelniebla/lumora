@@ -17,11 +17,7 @@ class SourcesScreen extends StatelessWidget {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Row(children: [
-          LumoraLogo(size: 34),
-          SizedBox(width: 12),
-          Text('Lumora', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1)),
-        ]),
+        title: const LumoraWordmark(logoSize: 36, tagline: false),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: s.loading ? null : () => _addDialog(context),
@@ -48,10 +44,13 @@ class SourcesScreen extends StatelessWidget {
                     ),
                   if (s.sources.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: 80),
+                      padding: const EdgeInsets.only(top: 24),
                       child: Column(
                         children: [
-                          const Icon(Icons.live_tv, size: 72),
+                          const Stack(alignment: Alignment.center, children: [GlowBlob(size: 320), LumoraLogo(size: 132)]),
+                          const SizedBox(height: 8),
+                          const Text('Lumora',
+                              style: TextStyle(fontFamily: kDisplayFont, fontFamilyFallback: kFontFallback, fontSize: 40, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 16),
                           Text(context.tr('add_first')),
                           const SizedBox(height: 8),
