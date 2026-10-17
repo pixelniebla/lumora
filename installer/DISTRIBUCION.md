@@ -1,4 +1,4 @@
-﻿# Repartir Lumora a otros usuarios
+# Repartir Lumora a otros usuarios
 
 ## Una sola vez
 1. Crea un repositorio en GitHub (puede ser privado si las descargas las haces tú; para que las apps de otros
@@ -21,3 +21,6 @@ actualizan. Un usuario nuevo solo necesita el `Lumora-Setup-X.exe` (mándaselo o
 Las versiones ya repartidas (o compiladas sin `update_url.txt`) buscan actualizaciones en la carpeta local del
 desarrollador: esos usuarios deben instalar a mano **una** versión hecha con `build_release.ps1`; a partir de
 ahí se actualizan solos. Windows mostrará el aviso de SmartScreen (instalador sin firma de código).
+
+## Firma de código y Microsoft Store
+Ver [FIRMA.md](FIRMA.md) (certificado propio, firma automática en uild_release.ps1) y [TIENDA.md](TIENDA.md) (paquete MSIX para la Store, que Microsoft firma).

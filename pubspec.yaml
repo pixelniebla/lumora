@@ -1,5 +1,5 @@
-﻿name: iptv_player
-description: "A new Flutter project."
+name: iptv_player
+description: "Lumora: IPTV player for your own M3U and Xtream Codes playlists. It includes no channels or content."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -62,6 +62,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   path_provider_platform_interface: ^2.1.3
+  msix: ^3.18.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -104,3 +105,21 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Microsoft Store (MSIX) packaging - see installer\TIENDA.md. identity_name / publisher / publisher_display_name
+# are PLACEHOLDERS until the app name is reserved in Partner Center; build_msix.ps1 overrides them from
+# installer\store\identity.json (copy the three values from Partner Center > Product identity).
+msix_config:
+  display_name: Lumora
+  publisher_display_name: pixelniebla
+  identity_name: pixelniebla.Lumora
+  publisher: CN=00000000-0000-0000-0000-000000000000
+  msix_version: 1.3.8.0
+  logo_path: installer\store\logo.png
+  capabilities: internetClient, privateNetworkClientServer
+  languages: es-es, en-us, pt-pt, fr-fr
+  store: true
+  install_certificate: false
+  build_windows: false
+  output_path: installer\output
+  output_name: Lumora-Store

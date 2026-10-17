@@ -1,4 +1,4 @@
-﻿# Lumora
+# Lumora
 
 Reproductor IPTV para Windows (Flutter + mpv). / IPTV player for Windows.
 
@@ -29,6 +29,7 @@ iscc installer\lumora.iss
 Para repartir versiones: ver [`installer/DISTRIBUCION.md`](installer/DISTRIBUCION.md).
 
 ## Privacidad
+Política completa: [PRIVACY.md](PRIVACY.md).
 Lumora no recoge ni envía datos a ningún servidor propio ni de terceros. Solo se conecta a las direcciones que
 el usuario configura (sus listas y guías) y a este repositorio de GitHub para comprobar actualizaciones.
 Las credenciales de las listas permanecen en el equipo del usuario.

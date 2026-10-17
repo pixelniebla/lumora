@@ -1,4 +1,4 @@
-﻿; Lumora installer script (Inno Setup 6)
+; Lumora installer script (Inno Setup 6)
 #define AppName "Lumora"
 #define AppVersion "1.3.8"
 #define AppExe "Lumora.exe"
@@ -24,6 +24,11 @@ ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
 CloseApplications=yes
+#ifdef SignInstaller
+; Passed by build_release.ps1 when a code-signing certificate is configured (see sign.ps1 / FIRMA.md).
+SignTool=lumorasign $f
+SignedUninstaller=yes
+#endif
 
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"

@@ -18,6 +18,7 @@ import 'services/library_cache.dart';
 import 'services/log.dart';
 import 'services/perf.dart';
 import 'services/secrets.dart';
+import 'services/store_build.dart';
 import 'services/m3u_parser.dart';
 import 'services/scheduler.dart';
 import 'services/stream_recorder.dart';
@@ -69,6 +70,8 @@ class AppState extends ChangeNotifier {
   UpdateInfo? updateAvailable;
   String appVersion = '';
   bool checkingUpdate = false;
+  /// Installed from the Microsoft Store (MSIX): no self-update. Overridable in tests.
+  bool storeBuild = isStoreBuild;
 
   Future<void> setUpdateSource(String v) async {
     updateSource = v.trim();
@@ -86,6 +89,7 @@ class AppState extends ChangeNotifier {
   /// Checks the update source. Returns an error message, or null when the check worked
   /// (then [updateAvailable] tells whether a newer version exists).
   Future<String?> checkUpdates() async {
+    if (storeBuild) return null; // Microsoft Store updates the app
     checkingUpdate = true;
     notifyListeners();
     try {
@@ -104,7 +108,7 @@ class AppState extends ChangeNotifier {
 
   /// Quiet startup check, at most once every 12 hours.
   Future<void> maybeCheckUpdates() async {
-    if (!autoUpdate || updateSource.isEmpty) return;
+    if (storeBuild || !autoUpdate || updateSource.isEmpty) return;
     final last = _prefs.getInt('lastUpdateCheck') ?? 0;
     if (DateTime.now().millisecondsSinceEpoch - last < const Duration(hours: 12).inMilliseconds) return;
     await checkUpdates();

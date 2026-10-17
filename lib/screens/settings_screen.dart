@@ -218,6 +218,9 @@ class SettingsScreen extends StatelessWidget {
                 ]),
               ),
               section(context.tr('updates')),
+              if (s.storeBuild)
+                Card(child: ListTile(leading: const Icon(Icons.storefront), title: Text('Lumora ${s.appVersion}'), subtitle: Text(context.tr('store_updates'))))
+              else
               const _UpdatesCard(),
               section(context.tr('about')),              Card(
                 child: ListTile(
